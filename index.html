@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Scorecard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Match Setup -->
+        <div id="setup-section" class="card">
+            <div class="card-header">
+                <h1>🏏 Cricket Scorecard</h1>
+            </div>
+            <div class="card-body">
+                <div class="setup-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="team1">Team 1 Name:</label>
+                            <input type="text" id="team1" placeholder="Enter team 1 name">
+                        </div>
+                        <div class="form-group">
+                            <label for="team2">Team 2 Name:</label>
+                            <input type="text" id="team2" placeholder="Enter team 2 name">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="toss-winner">Toss Winner:</label>
+                        <select id="toss-winner">
+                            <option value="">Select toss winner</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="batting-first">Choose to:</label>
+                        <select id="batting-first">
+                            <option value="bat">Bat First</option>
+                            <option value="bowl">Bowl First</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="overs">Total Overs:</label>
+                            <input type="number" id="overs" value="20" min="1" max="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="players-per-team">Players per Team:</label>
+                            <input type="number" id="players-per-team" value="11" min="1" max="15">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="startMatch()">Start Match</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match Progress -->
+        <div id="match-section" class="hidden">
+            <!-- Score Display -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="score-display">
+                        <div class="team-score">
+                            <div class="team-name" id="batting-team-name">Team A</div>
+                            <div class="score">
+                                <span id="current-score">0</span>/<span id="current-wickets">0</span>
+                                <div style="font-size: 18px; margin-top: 5px;">
+                                    Overs: <span id="current-overs">0.0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Over Display -->
+                    <div class="over-display">
+                        <h4>Current Over: <span id="over-number">1</span></h4>
+                        <div class="balls-in-over" id="balls-display"></div>
+                    </div>
+
+                    <!-- Current Players -->
+                    <div class="current-players">
+                        <div class="player-card striker" id="batsman1-card">
+                            <h4>Batsman 1 (Striker) *</h4>
+                            <div class="player-input-group">
+                                <input type="text" id="batsman1" placeholder="Enter batsman name">
+                                <button class="btn btn-save" onclick="saveBatsman('batsman1')">Save</button>
+                            </div>
+                            <div class="player-stats">
+                                <div>Runs: <span id="batsman1-runs">0</span> | Balls: <span id="batsman1-balls">0</span> | SR: <span id="batsman1-sr">0.0</span></div>
+                                <div class="boundary-stats">
+                                    <div class="boundary-stat">0s: <span id="batsman1-dots">0</span></div>
+                                    <div class="boundary-stat">1s: <span id="batsman1-ones">0</span></div>
+                                    <div class="boundary-stat">2s: <span id="batsman1-twos">0</span></div>
+                                    <div class="boundary-stat">4s: <span id="batsman1-fours">0</span></div>
+                                    <div class="boundary-stat">6s: <span id="batsman1-sixes">0</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="player-card" id="batsman2-card">
+                            <h4>Batsman 2</h4>
+                            <div class="player-input-group">
+                                <input type="text" id="batsman2" placeholder="Enter batsman name">
+                                <button class="btn btn-save" onclick="saveBatsman('batsman2')">Save</button>
+                            </div>
+                            <div class="player-stats">
+                                <div>Runs: <span id="batsman2-runs">0</span> | Balls: <span id="batsman2-balls">0</span> | SR: <span id="batsman2-sr">0.0</span></div>
+                                <div class="boundary-stats">
+                                    <div class="boundary-stat">0s: <span id="batsman2-dots">0</span></div>
+                                    <div class="boundary-stat">1s: <span id="batsman2-ones">0</span></div>
+                                    <div class="boundary-stat">2s: <span id="batsman2-twos">0</span></div>
+                                    <div class="boundary-stat">4s: <span id="batsman2-fours">0</span></div>
+                                    <div class="boundary-stat">6s: <span id="batsman2-sixes">0</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="player-card">
+                            <h4>Bowler</h4>
+                            <div class="player-input-group">
+                                <input type="text" id="bowler" placeholder="Enter bowler name">
+                                <button class="btn btn-save" onclick="saveBowler()">Save</button>
+                            </div>
+                            <div class="player-stats">
+                                <div>Overs: <span id="bowler-overs">0.0</span> | Runs: <span id="bowler-runs">0</span> | Wickets: <span id="bowler-wickets">0</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Run Input Buttons -->
+                    <div class="runs-buttons">
+                        <button class="run-btn" onclick="addRun(0)">0</button>
+                        <button class="run-btn" onclick="addRun(1)">1</button>
+                        <button class="run-btn" onclick="addRun(2)">2</button>
+                        <button class="run-btn" onclick="addRun(3)">3</button>
+                        <button class="run-btn" onclick="addRun(4)">4</button>
+                        <button class="run-btn" onclick="addRun(6)">6</button>
+                    </div>
+
+                    <div style="text-align: center; margin: 20px 0;">
+                        <button class="btn btn-danger" onclick="addWicket()">Wicket</button>
+                        <button class="btn btn-secondary" onclick="newOver()">New Over</button>
+                        <button class="btn btn-secondary" onclick="showScorecard()">View Scorecard</button>
+                        <button class="btn btn-secondary" onclick="endInnings()">End Innings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scorecard Display -->
+        <div id="scorecard-section" class="card hidden">
+            <div class="card-header">
+                <h2>📊 Match Scorecard</h2>
+            </div>
+            <div class="card-body">
+                <div id="scorecard-content"></div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="hideScorecard()">Back to Match</button>
+                    <button class="btn btn-primary" onclick="exportToPDF()">Export PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match End -->
+        <div id="match-end-section" class="hidden">
+            <div class="match-summary">
+                <div class="winner" id="winner-announcement"></div>
+                <div id="match-details"></div>
+                <div class="man-of-match" id="man-of-match"></div>
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="newMatch()">New Match</button>
+                    <button class="btn btn-secondary" onclick="exportToPDF()">Export PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
